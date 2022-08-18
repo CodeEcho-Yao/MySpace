@@ -24,8 +24,8 @@
       </ul>
       <ul class="navbar-nav" v-else>
         <li class="nav-item">
-          <router-link 
-            class="nav-link"
+          <router-link
+            class="nav-link" 
             :to="{name: 'userprofile', params: {userId: $store.state.user.id}}"
           >
             {{ $store.state.user.username }}
@@ -40,6 +40,7 @@
 </nav>
 </template>
 
+
 <script>
 import { useStore } from 'vuex';
 
@@ -50,6 +51,7 @@ export default {
       const logout = () => {
         store.commit('logout');
       };
+
       return {
         logout,
       }

@@ -6,9 +6,9 @@
                     <img class="img-fluid" :src="user.photo" alt="">
                 </div>
                 <div class="col-9">
-                    <div class="username">{{  user.username }}</div>
-                    <div class="fans">粉丝: {{ user.followerCount }}</div>
-                    <button @click="follow" v-if="!user.is_followed" type="button" class="btn btn-secondary btn-sm">+ 关注</button>
+                    <div class="username">{{ user.username }}</div>
+                    <div class="fans">粉丝：{{ user.followerCount }}</div>
+                    <button @click="follow" v-if="!user.is_followed" type="button" class="btn btn-secondary btn-sm">+关注</button>
                     <button @click="unfollow" v-if="user.is_followed" type="button" class="btn btn-secondary btn-sm">取消关注</button>
                 </div>
             </div>
@@ -17,6 +17,8 @@
 </template>
 
 <script>
+import $ from 'jquery';
+import { useStore } from 'vuex';
 
 export default {
     name: "UserProfileInfo",
@@ -27,12 +29,41 @@ export default {
         },
     },
     setup(props, context) {
+        const store = useStore();
         const follow = () => {
-            context.emit("follow");
-        }
+            $.ajax({
+              url: "https://app165.acapp.acwing.com.cn/myspace/follow/",
+              type: "POST",
+              data: {
+                  target_id: props.user.id,
+              },
+              headers: {
+                  'Authorization': "Bearer " + store.state.user.access,
+              },
+              success(resp) {
+                if (resp.result === "success") {
+                      context.emit('follow');
+                  }
+              }
+            });
+        };
 
         const unfollow = () => {
-            context.emit("unfollow");
+            $.ajax({
+              url: "https://app165.acapp.acwing.com.cn/myspace/follow/",
+              type: "POST",
+              data: {
+                  target_id: props.user.id,
+              },
+              headers: {
+                  'Authorization': "Bearer " + store.state.user.access,
+              },
+              success(resp) {
+                  if (resp.result === "success") {
+                      context.emit('unfollow');
+                  }
+              }
+            });
         }
 
         return {
@@ -42,6 +73,7 @@ export default {
     }
 }
 </script>
+
 
 <style scoped>
 img {
@@ -67,5 +99,4 @@ button {
     flex-direction: column;
     justify-content: center;
 }
-
 </style>

@@ -1,19 +1,19 @@
 <template>
   <ContentBase>
-    <div class="row">
-      <div class="col-3">
-        <UserProfileInfo @follow="follow" @unfollow="unfollow" :user="user" />
-        <UserProfileWrite v-if="is_me" @post_a_post="post_a_post" />
+      <div class="row">
+        <div class="col-3">
+          <UserProfileInfo @follow="follow" @unfollow="unfollow" :user="user" />
+          <UserProfileWrite v-if="is_me" @post_a_post="post_a_post" />
+        </div>
+        <div class="col-9">
+          <UserProfilePosts :user="user" :posts="posts" @delete_a_post="delete_a_post" />
+        </div>
       </div>
-      <div class="col-9">
-        <UserProfilePosts :posts="posts"/>
-      </div>
-    </div>
   </ContentBase>
 </template>
 
 <script>
-import ContentBase from '../components/ContentBase';
+import ContentBase from '../components/ContentBase'
 import UserProfileInfo from '../components/UserProfileInfo';
 import UserProfilePosts from '../components/UserProfilePosts';
 import UserProfileWrite from '../components/UserProfileWrite';
@@ -24,23 +24,19 @@ import { useStore } from 'vuex';
 import { computed } from 'vue';
 
 export default {
-  name: 'UserProfileView',
+  name: 'UserList',
   components: {
-    ContentBase,
-    UserProfileInfo,
-    UserProfilePosts,
-    UserProfileWrite
+      ContentBase,
+      UserProfileInfo,
+      UserProfilePosts,
+      UserProfileWrite
   },
   setup() {
     const store = useStore();
     const route = useRoute();
     const userId = parseInt(route.params.userId);
-
-    const user = reactive({
-    });
-
-    const posts = reactive({
-    });
+    const user = reactive({});
+    const posts = reactive({});
 
     $.ajax({
       url: "https://app165.acapp.acwing.com.cn/myspace/getinfo/",
@@ -76,26 +72,31 @@ export default {
     });
 
     const follow = () => {
-      if(user.is_followed) return ;
+      if (user.is_followed) return;
       user.is_followed = true;
-      user.followerCount ++;
+      user.followerCount ++ ;
     };
 
     const unfollow = () => {
-      if(!user.is_followed) return;
+      if (!user.is_followed) return;
       user.is_followed = false;
-      user.followerCount --;
+      user.followerCount -- ;
     };
 
-    const post_a_post = (content) => {
-      posts.count ++;
+    const post_a_post = content => {
+      posts.count ++ ;
       posts.posts.unshift({
-          id: posts.count,
-          userId: 1,
-          content: content,
+        id: posts.count,
+        userId: 1,
+        content: content,
       })
     };
 
+    const delete_a_post = post_id => {
+      posts.posts = posts.posts.filter(post => post.id !== post_id);
+      posts.count = posts.posts.length;
+    }
+    
     const is_me = computed(() => userId === store.state.user.id);
 
     return {
@@ -104,6 +105,7 @@ export default {
       unfollow,
       posts,
       post_a_post,
+      delete_a_post,
       is_me,
     }
   }
