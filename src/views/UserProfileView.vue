@@ -18,6 +18,7 @@ import UserProfileInfo from '../components/UserProfileInfo';
 import UserProfilePosts from '../components/UserProfilePosts';
 import UserProfileWrite from '../components/UserProfileWrite';
 import { reactive } from 'vue';
+import { useRoute } from 'vue-router';
 
 export default {
   name: 'UserProfileView',
@@ -28,6 +29,10 @@ export default {
     UserProfileWrite
   },
   setup() {
+    const route = useRoute();
+    const userId = route.params.userId;
+    console.log(userId)
+
     const user = reactive({
       id: 1,
       username: "CodeEcho",
