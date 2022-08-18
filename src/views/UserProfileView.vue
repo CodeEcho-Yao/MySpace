@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-3">
         <UserProfileInfo @follow="follow" @unfollow="unfollow" :user="user" />
-        <UserProfileWrite @post_a_post="post_a_post" />
+        <UserProfileWrite v-if="is_me" @post_a_post="post_a_post" />
       </div>
       <div class="col-9">
         <UserProfilePosts :posts="posts"/>
@@ -19,6 +19,9 @@ import UserProfilePosts from '../components/UserProfilePosts';
 import UserProfileWrite from '../components/UserProfileWrite';
 import { reactive } from 'vue';
 import { useRoute } from 'vue-router';
+import $ from 'jquery';
+import { useStore } from 'vuex';
+import { computed } from 'vue';
 
 export default {
   name: 'UserProfileView',
@@ -29,39 +32,48 @@ export default {
     UserProfileWrite
   },
   setup() {
+    const store = useStore();
     const route = useRoute();
-    const userId = route.params.userId;
-    console.log(userId)
+    const userId = parseInt(route.params.userId);
 
     const user = reactive({
-      id: 1,
-      username: "CodeEcho",
-      firstName: "Echo",
-      lastName: "Code",
-      followerCount: 1313,
-      is_followed: false,
     });
 
     const posts = reactive({
-      count: 3,
-      posts: [
-        {
-          id: 1,
-          userId: 1,
-          content: "前程万里毛羽需丰, 一旦奋飞何其雄"
-        },
-        {
-          id: 2,
-          userId: 1,
-          content: "Web"
-        },
-        {
-          id: 3,
-          userId: 1,
-          content: "vue3"
-        },
-      ]
-    })
+    });
+
+    $.ajax({
+      url: "https://app165.acapp.acwing.com.cn/myspace/getinfo/",
+      type: "GET",
+      data: {
+        user_id: userId,
+      },
+      headers: {
+        'Authorization': "Bearer " + store.state.user.access,
+      },
+      success(resp) {
+        user.id = resp.id;
+        user.username = resp.username;
+        user.photo = resp.photo;
+        user.followerCount = resp.followerCount;
+        user.is_followed = resp.is_followed;
+      }
+    });
+
+    $.ajax({
+      url: "https://app165.acapp.acwing.com.cn/myspace/post/",
+      type: "GET",
+      data: {
+        user_id: userId,
+      },
+      headers: {
+        'Authorization': "Bearer " + store.state.user.access,
+      },
+      success(resp) {
+        posts.count = resp.length;
+        posts.posts = resp;
+      }
+    });
 
     const follow = () => {
       if(user.is_followed) return ;
@@ -82,7 +94,9 @@ export default {
           userId: 1,
           content: content,
       })
-    }
+    };
+
+    const is_me = computed(() => userId === store.state.user.id);
 
     return {
       user,
@@ -90,6 +104,7 @@ export default {
       unfollow,
       posts,
       post_a_post,
+      is_me,
     }
   }
 }
